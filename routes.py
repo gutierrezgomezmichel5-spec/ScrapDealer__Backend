@@ -92,6 +92,9 @@ def init_routes(app, db):
                         "distancia_km": round(dist, 2)
                     })
         resultado.sort(key=lambda x: x['distancia_km'])
+        @app.route("/")
+        def home():
+                return jsonify({"mensaje": "¡ScrapDealer Backend FULL ACTIVADO!"}), 200
         return jsonify(resultado)
     
   
