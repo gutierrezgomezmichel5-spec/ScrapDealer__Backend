@@ -1,25 +1,29 @@
-# app.py
+# app.py ← VERSIÓN CORREGIDA
+import os
 from flask import Flask
+from flask_cors import CORS
 from config import Config
-from flask_sqlalchemy import SQLAlchemy
+from extensions import db  # ← Ahora usamos la instancia global
 from routes import init_routes
-from models import define_models
+# Ya no necesitas: import models
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# CREAMOS db AQUÍ
-db = SQLAlchemy(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-# DEFINIMOS EL MODELO DESPUÉS DE db
-Material = define_models(db)
+# Inicializamos la extensión con la app
+db.init_app(app)
 
-# CREAMOS TABLAS
+# CREAR TABLAS
 with app.app_context():
     db.create_all()
+    print("¡Tablas usuario y material creadas o ya existen en Neon!")
 
-# INICIAMOS RUTAS
-init_routes(app, db, Material)  # Pasamos db y Material
+# RUTAS
+init_routes(app, db)
+
+port = int(os.environ.get("PORT", 5000))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)
