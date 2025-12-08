@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: scrapdealer-backend        # ← puedes cambiar este nombre si quieres
+    env: python
+    region: oregon                    # o el que quieras
+    plan: free                        # o starter/pro si pagas
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 -m gunicorn app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: SQLALCHEMY_DATABASE_URI
+        sync: false                   # la pones manual en el dashboard
+      - key: SECRET_KEY
+        generateValue: true           # Render genera una segura
