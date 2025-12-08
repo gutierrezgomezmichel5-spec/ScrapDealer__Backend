@@ -12,6 +12,14 @@ app.config.from_object(Config)
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+# Esta línea arregla el error de conexión desde el APK
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
+
 # Inicializamos la extensión con la app
 db.init_app(app)
 
