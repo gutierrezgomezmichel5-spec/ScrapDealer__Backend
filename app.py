@@ -1,16 +1,17 @@
-# app.py
+# app.py - VERSIÓN ÚNICA Y FINAL PARA RENDER
 import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from config import Config
-from extensions import db
-from models import Usuario, Material, Solicitud
+from flask_sqlalchemy import SQLAlchemy
 from geopy.distance import geodesic
 import bcrypt
 from datetime import datetime
 
 app = Flask(__name__)
-app.config.from_object(Config)
+
+# CONFIGURACIÓN DIRECTA (sin config.py)
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://neondb_owner:npg_5mxh7JjzNHyq@ep-summer-bonus-a4gqupm1-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 
@@ -21,7 +22,36 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     return response
 
-db.init_app(app)
+# CREAR db DIRECTAMENTE
+db = SQLAlchemy(app)
+
+# MODELOS DIRECTOS (sin models.py)
+class Usuario(db.Model):
+    __tablename__ = 'usuario'
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+    saldo = db.Column(db.Float, default=0.0)
+
+class Material(db.Model):
+    __tablename__ = 'material'
+    id = db.Column(db.Integer, primary_key=True)
+    tipo = db.Column(db.String(50), nullable=False)
+    cantidad = db.Column(db.Float, nullable=False)
+    lat = db.Column(db.Float)
+    lon = db.Column(db.Float)
+
+class Solicitud(db.Model):
+    __tablename__ = 'solicitudes'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), nullable=False)
+    material = db.Column(db.String(50), nullable=False)
+    precio_por_kg = db.Column(db.Float, nullable=False)
+    cantidad_kg = db.Column(db.Float, nullable=False)
+    total = db.Column(db.Float, nullable=False)
+    estado = db.Column(db.String(20), default='en_recoleccion')
+    fecha = db.Column(db.DateTime, default=datetime.utcnow)
 
 with app.app_context():
     db.create_all()
@@ -220,4 +250,3 @@ def borrar_cuenta():
 @app.route("/")
 def root():
     return jsonify({"mensaje": "¡ScrapDealer Backend FULL ACTIVADO! 🌱"}), 200
-
