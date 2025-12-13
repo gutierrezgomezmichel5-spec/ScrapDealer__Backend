@@ -221,7 +221,7 @@ def borrar_cuenta():
 def root():
     return jsonify({"mensaje": "¡ScrapDealer Backend FULL ACTIVADO! 🌱"}), 200
 
-import os
-
-port = int(os.environ.get('PORT', 10000))
-app.run(host='0.0.0.0', port=port)
+# Para Render con gunicorn
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
