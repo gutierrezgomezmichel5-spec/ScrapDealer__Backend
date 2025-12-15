@@ -109,7 +109,8 @@ def login():
     return jsonify({
         "mensaje": "Login exitoso",
         "nombre": usuario.nombre,
-        "email": usuario.email
+        "email": usuario.email,
+        "id": usuario.id
     }), 200
 
 @app.route('/api/material', methods=['POST'])
