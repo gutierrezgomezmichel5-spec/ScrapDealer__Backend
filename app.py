@@ -113,19 +113,36 @@ def login():
 @app.route('/api/material', methods=['POST'])
 def add_material():
     data = request.get_json()
-    if not data or 'tipo' not in data or 'cantidad' not in data or 'email' not in data:
-        return jsonify({"error": "Faltan datos (tipo, cantidad, email)"}), 400
-    
+    if not data or 'tipo' not in data or 'cantidad' not in data:
+        return jsonify({"error": "Faltan datos"}), 400
+
+    try:
+        cantidad = float(data['cantidad'])
+        if cantidad <= 0:
+            return jsonify({"error": "La cantidad debe ser mayor a 0"}), 400
+    except:
+        return jsonify({"error": "Cantidad inválida"}), 400
+
+    # Solo insertamos las columnas que realmente existen en la tabla
     nuevo = Material(
         tipo=data['tipo'].lower(),
-        cantidad=data['cantidad'],
+        cantidad=cantidad,
         lat=data.get('lat'),
-        lon=data.get('lon'),
-        email=data['email']  # ← Se guarda el email del usuario
+        lon=data.get('lon')
     )
-    db.session.add(nuevo)
-    db.session.commit()
-    return jsonify({"mensaje": "Material registrado"}), 201
+
+    try:
+        db.session.add(nuevo)
+        db.session.commit()
+        return jsonify({
+            "mensaje": "Material registrado",
+            "id": nuevo.id
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        print("Error al registrar material:", str(e))
+        return jsonify({"error": "Error interno al registrar material"}), 500
+
 
 # ← NUEVO ENDPOINT: Mis materiales del usuario
 @app.route('/api/mis_materiales', methods=['GET'])
