@@ -42,7 +42,8 @@ class Material(db.Model):
     cantidad = db.Column(db.Float, nullable=False)
     lat = db.Column(db.Float)
     lon = db.Column(db.Float)
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)  # ← AÑADIDO
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=True, default=None)  # ← TEMPORAL: nullable=True
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=True)  # ← TEMPORAL: nullable=True
 
 class Solicitud(db.Model):
     __tablename__ = 'solicitudes'
@@ -119,7 +120,7 @@ def add_material():
     data = request.get_json()
     if not data or 'tipo' not in data or 'cantidad' not in data:
         return jsonify({"error": "Faltan datos"}), 400
-
+    usuario_id = data.get('usuario_id', 1)
     nuevo = Material(
         tipo=data['tipo'].lower(),
         cantidad=data['cantidad'],
@@ -252,7 +253,3 @@ def borrar_cuenta():
 @app.route("/")
 def root():
     return jsonify({"mensaje": "¡ScrapDealer Backend FULL ACTIVADO! 🌱"}), 200
-
-@app.route("/")
-def root():
-    return jsonify({"mensaje": "¡ScrapDealer Backend FULL ACTIVADO CON RANKING POR USUARIO! 🌱"}), 200
